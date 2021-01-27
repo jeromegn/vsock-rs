@@ -135,11 +135,7 @@ impl VsockListener {
             )
         };
         if socket < 0 {
-            let err = Error::last_os_error();
-            match err.kind() {
-                ErrorKind::Interrupted => return self.accept(),
-                _ => Err(err),
-            }
+            Err(Error::last_os_error())
         } else {
             Ok((
                 unsafe { VsockStream::from_raw_fd(socket as RawFd) },
@@ -439,11 +435,7 @@ impl Read for &VsockStream {
     fn read(&mut self, buf: &mut [u8]) -> Result<usize> {
         let ret = unsafe { recv(self.socket, buf.as_mut_ptr() as *mut c_void, buf.len(), 0) };
         if ret < 0 {
-            let err = Error::last_os_error();
-            match err.kind() {
-                ErrorKind::Interrupted => return self.read(buf),
-                _ => Err(err),
-            }
+            Err(Error::last_os_error())
         } else {
             Ok(ret as usize)
         }
@@ -461,11 +453,7 @@ impl Write for &VsockStream {
             )
         };
         if ret < 0 {
-            let err = Error::last_os_error();
-            match err.kind() {
-                ErrorKind::Interrupted => return self.write(buf),
-                _ => Err(err),
-            }
+            Err(Error::last_os_error())
         } else {
             Ok(ret as usize)
         }
